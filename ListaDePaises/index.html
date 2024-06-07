@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-Br">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
@@ -24,19 +24,30 @@
                 <option value="capital">Capital</option>
             </select>
         </fieldset>
+<table>
+    <thead>
+      <tr>
+        <th>Bandeira</th>
+        <th>Nome</th>
+        <th>Região</th>
+        <th>Capital</th>
+      </tr>
+    </thead>
+    <tbody id="lista"></tbody>
+  </table>
 
-        <!-- lista de paises -->
-        <fieldset>
-            <legend>Lista</legend>
-            <!-- TODO: 1. Adicionar estilo a lista -->
-            <!-- TODO: 2. Alterar visão da lista para tabela -->
-            <ol id="lista">
-                <!-- local para adicionar a lista de paises -->
-            </ol>
-        </fieldset>
+  <!-- <script src="script.js"></script> -->
+
+<!-- Modal para mostrar detalhes do país -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="detalhes"></div>
     </div>
-    <script src="script.js">
-    </script>
-</body>
+  </div>
 
+  <script src="script.js"></script>
+</body>
+</html>
+</body>
 </html>

@@ -1,15 +1,18 @@
 var elementoLista = document.getElementById("lista");
 var elementoOrdenacao = document.querySelector("select");
+var modal = document.getElementById("modal");
+var span = document.getElementsByClassName("close")[0];
+var detalhes = document.getElementById("detalhes");
 
 /**
- * Função que busca a lista de paises e retorna uma *Promisse com a lista.
- * *Promisse são funções assincronas que utilizam o .then e .catch para obter o resultado;
- * @returns Promisse(object[])
+ * Função que busca a lista de países e retorna uma Promessa com a lista.
+ * Promessas são funções assíncronas que utilizam .then e .catch para obter o resultado;
+ * @returns Promise(object[])
  */
 function carregarLista() {
   // variável com o link da API
   const link_api = "https://restcountries.com/v3.1/all";
-  // função fecth que busca os dados via HTTP GET
+  // função fetch que busca os dados via HTTP GET
   return fetch(link_api)
     .then(function (response) {
       return response.json();
@@ -21,9 +24,9 @@ function carregarLista() {
 
 /**
  * Função que ordena a lista pelo valor passado
- * @param object[] lista
- * @param string ordernarPor 
- * @returns object[]
+ * @param {object[]} lista
+ * @param {string} ordernarPor 
+ * @returns {object[]}
  */
 function ordenar(lista, ordernarPor) {
   if (!elementoOrdenacao) {
@@ -31,41 +34,70 @@ function ordenar(lista, ordernarPor) {
   }
   // Tipo de ordenação
   if (ordernarPor == "regiao") {
-    // a funçao sort recebe uma função que tem dois parametros 
-    // e irá compará-los, caso o retoro seja negativo inverterá
-    // os valores, assim ordenando a lista
     return lista.sort(function (anterior, atual) {
-      return anterior.region > atual.region ? 1 : -1;
+      return anterior.region.localeCompare(atual.region);
     });
   } else if (ordernarPor == "nome") {
     return lista.sort(function (anterior, atual) {
-      return anterior.name.official > atual.name.official ? 1 : -1;
+      return anterior.name.official.localeCompare(atual.name.official);
+    });
+  } else if (ordernarPor == "capital") {
+    return lista.sort(function (anterior, atual) {
+      const capitalAnterior = anterior.capital ? anterior.capital[0] : '';
+      const capitalAtual = atual.capital ? atual.capital[0] : '';
+      return capitalAnterior.localeCompare(capitalAtual);
     });
   }
-  // TODO: Adicionar demais ordenações 
-  /** ... */
-
   return lista;
 }
 
 /**
- * Add item na tela
- * @param object pais  
+ * Adiciona item na tela
+ * @param {object} pais  
  */
 function adicionarPaisNaTela(pais) {
   if (!elementoLista) {
     return;
   }
-  // criar um novo elemento html <li>
-  const item = document.createElement("li");
-  // TODO: Adicionar evento de clique para mostrar detalhes do pais
-  /** ... */
-  // template string
-  const conteudo = `[${pais.flag}] ${pais.region}: <b>${pais.name.official}</b> - <i>${pais.capital}</i>`;
-  // adicionar conteúdo ao elemento <li> como HTML
+  // criar um novo elemento html <tr>
+  const item = document.createElement("tr");
+  
+  // template string com a imagem da bandeira e detalhes
+  const conteudo = `
+    <td><img src="${pais.flags.svg}" alt="Flag of ${pais.name.official}" width="20"></td>
+    <td>${pais.name.official}</td>
+    <td>${pais.region}</td>
+    <td>${pais.capital}</td>
+  `;
+  
+  // adicionar conteúdo ao elemento <tr> como HTML
   item.innerHTML = conteudo;
+  
+  // Adicionar evento de clique para mostrar detalhes do país
+  item.addEventListener("click", function() {
+    mostrarDetalhes(pais);
+  });
+  
   // adicionar elemento como filho ao elemento lista
   elementoLista.appendChild(item);
+}
+
+/**
+ * Função para mostrar detalhes do país no modal
+ * @param {object} pais
+ */
+function mostrarDetalhes(pais) {
+  const conteudoDetalhes = `
+    <h2>${pais.name.official}</h2>
+    <p><strong>Região:</strong> ${pais.region}</p>
+    <p><strong>Sub-região:</strong> ${pais.subregion}</p>
+    <p><strong>Capital:</strong> ${pais.capital}</p>
+    <p><strong>População:</strong> ${pais.population}</p>
+    <p><strong>Área:</strong> ${pais.area} km²</p>
+    <img src="${pais.flags.svg}" alt="Flag of ${pais.name.official}" width="100">
+  `;
+  detalhes.innerHTML = conteudoDetalhes;
+  modal.style.display = "block";
 }
 
 /**
@@ -81,9 +113,9 @@ function carregarDados() {
       const ordernarPor = elementoOrdenacao.value;
       lista = ordenar(lista, ordernarPor);
 
-      //limpar elementos
+      // limpar elementos
       elementoLista.innerHTML = "";
-      for (pais of lista) {
+      for (let pais of lista) {
         adicionarPaisNaTela(pais);
       }
     })
@@ -100,4 +132,20 @@ elementoOrdenacao.addEventListener("change", (evento) => {
   carregarDados();
 });
 
+// Definir valor padrão de ordenação como "capital"
+elementoOrdenacao.value = "capital";
+
+// Carregar dados inicialmente ordenados por capital
 carregarDados();
+
+// Quando o usuário clicar no "x", fechar o modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// Quando o usuário clicar fora do modal, fechá-lo
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
